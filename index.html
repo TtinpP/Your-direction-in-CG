@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест: Твоя профессия в CG</title>
+    <title>Тест: Твоё направление в CG</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -36,15 +36,13 @@
             position: relative;
             margin-bottom: 30px;
             margin-top: 10px;
-            height: 20px; /* Высота под точки */
+            height: 20px; 
         }
         
-        /* СЕРАЯ ЛИНИЯ (Фон) */
         .progress-track {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            /* Отступы, чтобы линия пряталась за точками */
             left: 6px; 
             right: 6px;
             height: 4px;
@@ -53,25 +51,21 @@
             border-radius: 2px;
         }
 
-        /* ГОЛУБАЯ ЛИНИЯ (Заливка) */
         .progress-fill {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            left: 6px; /* Стартует там же, где серая */
+            left: 6px;
             height: 4px;
             background-color: #00d2ff;
             z-index: 0;
             width: 0%; 
-            /* ГЛАВНОЕ ИСПРАВЛЕНИЕ: Ограничиваем максимальную ширину.
-               100% ширины контейнера минус (6px слева + 6px справа) */
             max-width: calc(100% - 12px); 
             transition: width 0.4s ease;
             box-shadow: 0 0 10px #00d2ff;
             border-radius: 2px;
         }
 
-        /* Контейнер для точек (они лежат поверх линий) */
         .checkpoints {
             display: flex;
             justify-content: space-between;
@@ -81,12 +75,11 @@
             height: 100%;
         }
 
-        /* Обычная точка */
         .dot {
             width: 12px;
             height: 12px;
             background-color: #444;
-            border: 3px solid #2b2b2b; /* Окантовка под цвет фона */
+            border: 3px solid #2b2b2b;
             border-radius: 50%;
             transition: 0.3s;
             box-sizing: content-box; 
@@ -102,7 +95,6 @@
             background-color: #00d2ff;
         }
 
-        /* ФИНИШНАЯ ТОЧКА (Белая) */
         .dot.finish-dot {
             border-color: #fff; 
             width: 14px;
@@ -113,24 +105,27 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
         }
 
-        /* --- ОСТАЛЬНОЕ --- */
+        /* --- ТЕКСТЫ И КНОПКИ --- */
         h2 { 
             color: #fff; 
             margin-bottom: 25px; 
-            font-size: 22px;
-            min-height: 54px;
+            font-size: 24px;
+            min-height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1.3;
         }
         .answers-box {
             flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         .btn {
             display: block;
             width: 100%;
             padding: 18px;
-            margin: 12px 0;
             background-color: #3a3a3a;
             border: 2px solid transparent;
             color: #e0e0e0;
@@ -140,6 +135,8 @@
             font-size: 16px;
             text-align: left;
             font-weight: 500;
+            position: relative;
+            overflow: hidden;
         }
         .btn:hover {
             background-color: #444;
@@ -160,7 +157,7 @@
             padding: 10px;
             font-size: 14px;
             align-self: flex-start;
-            margin-top: 10px;
+            margin-top: 20px;
             transition: 0.2s;
             display: flex;
             align-items: center;
@@ -174,24 +171,37 @@
         /* Результаты */
         .result-box {
             display: none;
-            animation: fadeIn 0.5s ease;
+            animation: fadeIn 0.6s ease;
         }
         .result-icon {
-            font-size: 60px;
-            margin-bottom: 10px;
+            font-size: 64px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+        .result-header {
+            font-size: 18px;
+            color: #888;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .result-title {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
             color: #00d2ff;
-            margin-bottom: 15px;
-            text-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            margin-bottom: 20px;
+            text-shadow: 0 0 25px rgba(0, 210, 255, 0.4);
+            line-height: 1.2;
         }
         .result-desc {
             font-size: 17px;
             line-height: 1.6;
             color: #ccc;
             margin-bottom: 30px;
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
         }
         .restart-btn {
             background-color: #00d2ff;
@@ -199,6 +209,7 @@
             border: none;
             font-weight: bold;
             text-align: center;
+            font-size: 18px;
         }
         .restart-btn:hover {
             background-color: #fff;
@@ -207,8 +218,12 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
     </style>
 </head>
@@ -234,70 +249,71 @@
 
 <div class="container result-box" id="result-container">
     <div class="result-icon">✨</div>
-    <h2>Твой идеальный путь:</h2>
+    <div class="result-header">Твоё направление:</div>
     <div class="result-title" id="result-role">Роль</div>
     <div class="result-desc" id="result-text">Описание</div>
     <button class="btn restart-btn" onclick="location.reload()">Пройти заново</button>
 </div>
 
 <script>
+    // Вопросы адаптированы для новичков (без сложного жаргона)
     const questions = [
         {
-            text: "Что приносит больше кайфа в процессе?",
+            text: "Что тебе интереснее делать?",
             options: [
-                { text: "Рисовать, лепить, создавать визуал", scores: { model: 2, comp: 1 } },
-                { text: "Копаться в настройках, скриптах и нодах", scores: { rig: 2, vfx: 1 } },
-                { text: "Совмещать: чтобы и красиво, и работало", scores: { vfx: 2, rig: 1 } }
+                { text: "Создавать визуальную форму (лепить, рисовать)", scores: { model: 2, comp: 1 } },
+                { text: "Разбираться в технической части (как это работает изнутри)", scores: { rig: 2, vfx: 1 } },
+                { text: "Совмещать технику и творчество", scores: { vfx: 2, rig: 1 } }
             ]
         },
         {
             text: "Твое отношение к математике и логике?",
             options: [
-                { text: "О нет, я за интуицию и глаз художника", scores: { model: 2, anim: 1 } },
-                { text: "Люблю логические задачи и порядок", scores: { rig: 2, vfx: 1 } },
-                { text: "Потерплю формулы ради крутого взрыва", scores: { vfx: 2 } }
+                { text: "Я больше доверяю интуиции и художественному вкусу", scores: { model: 2, anim: 1 } },
+                { text: "Люблю порядок, структуры и логические задачи", scores: { rig: 2, vfx: 1 } },
+                { text: "Готов(а) потерпеть формулы ради крутого эффекта", scores: { vfx: 2 } }
             ]
         },
         {
-            text: "Кем бы ты был на съемочной площадке?",
+            text: "Какую роль ты бы выбрал(а) в кинокоманде?",
             options: [
-                { text: "Актером (эмоции, мимика, драйв)", scores: { anim: 3 } },
-                { text: "Декоратором (фактуры, детали, объекты)", scores: { model: 2 } },
-                { text: "Оператором (свет, композиция кадра)", scores: { comp: 3 } }
+                { text: "Актер (играть эмоции, управлять движением)", scores: { anim: 3 } },
+                { text: "Декоратор (создавать предметы, окружение, детали)", scores: { model: 2 } },
+                { text: "Оператор/Режиссер (выставлять кадр, свет, атмосферу)", scores: { comp: 3 } }
             ]
         },
         {
-            text: "Можешь ли ты сидеть над одной деталью часами?",
+            text: "Что тебе ближе в работе?",
             options: [
-                { text: "Да, могу весь день рисовать царапины", scores: { model: 2 } },
-                { text: "Нет, мне нужно видеть движение!", scores: { anim: 2 } },
-                { text: "Мне нравится собирать сцену из готовых кусков", scores: { comp: 2, vfx: 1 } }
+                { text: "Могу часами прорабатывать одну мелкую деталь", scores: { model: 2 } },
+                { text: "Мне скучно в статике, нужно чтобы всё двигалось!", scores: { anim: 2 } },
+                { text: "Мне нравится собирать готовую картинку из разных частей", scores: { comp: 2, vfx: 1 } }
             ]
         },
         {
-            text: "Симуляция взорвалась, программа вылетела. Ты...",
+            text: "Если в программе произошел сбой или глюк, ты...",
             options: [
-                { text: "С интересом ищу причину. Люблю хаос", scores: { vfx: 3 } },
-                { text: "Бешусь. Люблю полный контроль", scores: { model: 1, anim: 1 } },
-                { text: "Иду пить чай, я вообще про искусство", scores: { comp: 1, model: 1 } }
+                { text: "С интересом ищу причину. Люблю решать головоломки", scores: { vfx: 3 } },
+                { text: "Раздражаюсь. Мне нужен полный контроль над процессом", scores: { model: 1, anim: 1 } },
+                { text: "Не хочу в этом копаться, я здесь ради искусства", scores: { comp: 1, model: 1 } }
             ]
         },
         {
-            text: "Что для тебя 'красивая картинка'?",
+            text: "Что для тебя «идеальная картинка»?",
             options: [
-                { text: "Киношный свет, цвет и атмосфера", scores: { comp: 3 } },
-                { text: "Эпичный масштаб, разрушения, магия", scores: { vfx: 3 } },
-                { text: "Живой персонаж с характером", scores: { model: 1, anim: 1 } }
+                { text: "Красивый свет, цвет и киношная атмосфера", scores: { comp: 3 } },
+                { text: "Масштабные разрушения, магия и эпичность", scores: { vfx: 3 } },
+                { text: "Живой, харизматичный персонаж", scores: { model: 1, anim: 1 } }
             ]
         }
     ];
 
     const resultsData = {
-        model: { title: "3D Modeler / Texture Artist", desc: "Ты скульптор цифрового мира. Тебе нравится статика, проработка деталей и медитативный процесс создания форм. Тебе идеально подойдет создание персонажей, окружения или пропсов." },
-        anim: { title: "3D Animator", desc: "В тебе живет актер! Твоя суперсила — вдыхать жизнь в бездушные 3D-модели. Тебе важны тайминг, эмоции и законы физики движения." },
-        vfx: { title: "FX Artist (VFX)", desc: "Ты повелитель стихий. Взрывы, вода, магия, дым, разрушения. Ты ладишь с физикой, математикой и точно сможешь делать 'красиво' через сложные симуляции." },
-        rig: { title: "Rigger / Technical Artist", desc: "Ты прирожденный инженер этого мира. Без тебя модели — просто статуи. Тебе дано решать головоломки, строить скелеты и оптимизировать системы. Попробуй!" },
-        comp: { title: "Lighting / Compositing Artist", desc: "Ты тот, кому суждено делать финальную магию. Собирать все слои (рендер, свет, эффекты) воедино и создать то самое киношное настроение." }
+        model: { title: "3D Modeling (Моделирование)", desc: "Ты — скульптор цифрового мира. Тебе нравится создавать формы с нуля, прорабатывать текстуры и детали. Твой путь — создание персонажей, техники или окружения для игр и кино." },
+        anim: { title: "3D Animation (Анимация)", desc: "Ты вдыхаешь жизнь в объекты! Твоя суперсила — актерское мастерство через компьютер. Тебе важно чувство времени (тайминг) и понимание того, как двигаются живые существа." },
+        vfx: { title: "VFX Artist (Спецэффекты)", desc: "Ты — повелитель стихий. Взрывы, огонь, вода, магия, разрушения — это твоих рук дело. Ты находишь баланс между физикой, математикой и красивой картинкой." },
+        rig: { title: "Rigging (Риггинг)", desc: "Ты — инженер скелета. Без тебя 3D-модель — это просто статуя. Ты создаешь систему управления («костную систему»), чтобы аниматор мог легко управлять персонажем. Это работа для тех, кто любит логику." },
+        comp: { title: "Lighting & Compositing", desc: "Ты создаешь финальную магию. Твоя задача — собрать все слои (3D, свет, эффекты) в единую красивую картинку, настроить настроение кадра и цвет. Ты — глаза проекта." }
     };
 
     let currentStep = 0;
@@ -312,7 +328,6 @@
             const dot = document.createElement("div");
             dot.className = "dot";
             dot.id = `dot-${i}`;
-            // Добавляем класс последней точке
             if (i === questions.length - 1) {
                 dot.classList.add("finish-dot");
             }
@@ -323,11 +338,9 @@
 
     function updateProgress() {
         const fill = document.getElementById("progress-fill");
-        // Рассчитываем процент
         const percent = (currentStep / (questions.length - 1)) * 100;
         fill.style.width = `${percent}%`;
 
-        // Обновляем классы точек
         for(let i = 0; i < questions.length; i++) {
             const dot = document.getElementById(`dot-${i}`);
             dot.classList.remove("active", "completed");
@@ -353,11 +366,15 @@
         
         const answersDiv = document.getElementById("answers");
         answersDiv.innerHTML = "";
-
-        q.options.forEach(opt => {
+        
+        // Добавляем небольшую задержку для анимации появления кнопок
+        q.options.forEach((opt, index) => {
             const btn = document.createElement("button");
             btn.className = "btn";
             btn.innerText = opt.text;
+            btn.style.animation = `fadeIn 0.3s ease forwards ${index * 0.1}s`;
+            btn.style.opacity = "0"; // Начальное состояние для анимации
+            
             btn.onclick = () => {
                 scoreHistory.push(opt.scores);
                 for (let key in opt.scores) {
@@ -402,6 +419,7 @@
         let maxScore = -1;
         let winner = "model"; 
         
+        // Простая логика определения победителя
         for (let role in userScores) {
             if (userScores[role] > maxScore) {
                 maxScore = userScores[role];
