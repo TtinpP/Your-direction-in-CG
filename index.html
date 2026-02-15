@@ -728,27 +728,58 @@
         sendDataToGoogleSheet(telegramNick, winner, userScores, userAnswers);
     }
 
-    function sendDataToGoogleSheet(telegram, winner, scores, answers) {
-        if (!GOOGLE_SCRIPT_URL.startsWith("https://script.google.com/macros/library/d/1LksfSF1qD6fGCoPZaRWM38YpZOZi_bRSDuP1Vikpd8xJlCAeAWoRSi03/5")) {
-            console.warn("Ссылка на Google Script не настроена.");
+        function sendDataToGoogleSheet(telegram, winner, scores, answers) {
+        if (!GOOGLE_SCRIPT_URL.startsWith("https://script.google.com/macros/s/AKfycbw-hYGs4LbFnXNV3sQMxQT5pC7uuAUIQCV6xQSVu4lSbndFFyhSzDZdUDlEDGQN03Af0A/exec")) {
+            console.warn("Ссылка не настроена!");
             return;
         }
 
-        // Подготавливаем данные для URL
-        const params = new URLSearchParams({
+        // Создаем уникальное имя для iframe
+        const iframeName = 'hidden_iframe_' + Date.now();
+
+        // 1. Создаем скрытый iframe
+        const iframe = document.createElement('iframe');
+        iframe.name = iframeName;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        // 2. Создаем форму
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = GOOGLE_SCRIPT_URL;
+        form.target = iframeName; // Ответ уйдет в iframe
+        form.style.display = 'none';
+
+        // 3. Добавляем данные
+        const data = {
             telegram: telegram,
             role: resultsData[winner].title,
             scores: JSON.stringify(scores),
             answers: JSON.stringify(answers)
-        }).toString();
+        };
 
-        // Отправляем как "картинку" (самый надежный способ GET)
-        const img = new Image();
-        img.src = GOOGLE_SCRIPT_URL + "?" + params;
-        
-        console.log("Отправка данных (Image GET)...");
+        for (const key in data) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = data[key];
+            form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+
+        // 4. Отправляем
+        form.submit();
+        console.log("Данные отправлены через форму!");
+
+        // 5. Убираем мусор через пару секунд
+        setTimeout(() => {
+            document.body.removeChild(form);
+            // iframe лучше не удалять сразу, пусть висит
+        }, 2000);
     }
 </script>
 
 </body>
 </html>
+
