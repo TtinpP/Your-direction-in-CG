@@ -6,13 +6,12 @@
     <title>Тест: Твой истинный путь в CG и AI</title>
     <style>
         :root {
-            --primary-color: #00f2ea; /* Cyber Cyan */
-            --bg-color: #0f172a;      /* Deep Blue-Black */
-            --card-color: #1e293b;    /* Slate Blue */
+            --primary-color: #00f2ea;
+            --bg-color: #0f172a;
+            --card-color: #1e293b;
             --text-color: #f1f5f9;
             --accent-purple: #a855f7;
             --accent-green: #10b981;
-            --error-color: #ef4444;
         }
 
         body {
@@ -44,7 +43,7 @@
             transition: all 0.5s ease;
         }
 
-        /* --- ОБЛОЖКА --- */
+        /* ОБЛОЖКА */
         .start-screen {
             display: flex;
             flex-direction: column;
@@ -107,7 +106,7 @@
 
         .tg-input {
             width: 100%;
-            padding: 15px 15px 15px 35px; /* Отступ слева под @ */
+            padding: 15px 15px 15px 35px;
             border-radius: 12px;
             border: 2px solid #334155;
             background-color: #0f172a;
@@ -156,7 +155,7 @@
         }
 
         .start-btn {
-            background: #334155; /* Серый изначально */
+            background: #334155;
             color: #64748b;
             border: none;
             padding: 20px 60px;
@@ -186,7 +185,7 @@
             box-shadow: 0 0 35px rgba(0, 242, 234, 0.6);
         }
 
-        /* --- ТЕСТ --- */
+        /* ТЕСТ */
         #quiz-container { display: none; }
         
         .progress-container { margin-bottom: 30px; }
@@ -270,7 +269,7 @@
         }
         .back-btn:hover { color: var(--primary-color); }
 
-        /* --- РЕЗУЛЬТАТЫ --- */
+        /* РЕЗУЛЬТАТЫ */
         .result-box {
             display: none;
             animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -368,7 +367,6 @@
         <div class="start-title">Твоё направление<br>в CG</div>
         <div class="start-desc">Узнай свою роль в мире компьютерной графики и нейросетей. Введи свой Telegram, чтобы начать.</div>
         
-        <!-- Ввод Telegram -->
         <div class="input-group">
             <div class="tg-input-wrapper">
                 <span class="tg-at-symbol">@</span>
@@ -428,19 +426,16 @@
 </div>
 
 <script>
-    // === ВАЖНО: ВСТАВЬ СЮДА ССЫЛКУ ИЗ GOOGLE SCRIPTS ===
-    const GOOGLE_SCRIPT_URL = "ВСТАВЬ_СЮДА_СВОЮ_ССЫЛКУ";
-    // ====================================================
+    // ССЫЛКА НА GOOGLE SCRIPT (уже вставлена твоя)
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6zI-h-JUho1OmIzzQCCh7ra0aKBtIj_PXcBbRx-2wx0DgiLOYOR1qaa8mTPBBzPBTgg/exec";
+    
+    let telegramNick = "";
 
-    let telegramNick = ""; // Переменная для хранения ника
-
-    // Функция валидации ввода (проверяем длину > 4 символов)
     function validateInput() {
         const input = document.getElementById("tg-username");
         const btn = document.getElementById("confirm-btn");
         const val = input.value.trim();
 
-        // Убираем @ если пользователь ввел его сам
         if (val.startsWith("@")) {
             input.value = val.substring(1);
         }
@@ -454,30 +449,26 @@
         }
     }
 
-    // Функция подтверждения ника
     function confirmTelegram() {
         const input = document.getElementById("tg-username");
         const confirmBtn = document.getElementById("confirm-btn");
         const startBtn = document.getElementById("start-quiz-btn");
         
         if (input.value.length >= 5) {
-            telegramNick = "@" + input.value; // Сохраняем с собачкой
+            telegramNick = "@" + input.value;
             
-            // Визуальные изменения
             input.disabled = true;
             input.classList.add("valid");
             
-            confirmBtn.innerText = "✓"; // Галочка
+            confirmBtn.innerText = "✓";
             confirmBtn.classList.remove("active");
             confirmBtn.classList.add("success");
-            confirmBtn.disabled = true; // Блокируем кнопку OK
+            confirmBtn.disabled = true;
             
-            // Активируем кнопку НАЧАТЬ
             startBtn.classList.add("ready");
         }
     }
 
-    // Данные теста
     const questions = [
         {
             text: "Представь: у тебя очень слабый ноутбук, который с трудом тянет современные игры. Но тебе нужно сделать крутой проект. Твоя стратегия?",
@@ -629,7 +620,7 @@
     let currentStep = 0;
     let userScores = { manager: 0, artdir: 0, lead: 0, ai_gen: 0, story: 0 };
     let scoreHistory = [];
-    let userAnswers = []; 
+    let userAnswers = [];
 
     function startQuiz() {
         document.getElementById("start-screen").style.display = "none";
@@ -667,13 +658,12 @@
             const btn = document.createElement("button");
             btn.className = "btn";
             btn.innerText = opt.text;
-            // Анимация задержки для кнопок
             btn.style.animation = `slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards ${index * 0.07}s`;
             btn.style.opacity = "0"; 
             
             btn.onclick = () => {
                 scoreHistory.push(opt.scores);
-                userAnswers.push(opt.text); 
+                userAnswers.push(opt.text);
                 for (let key in opt.scores) {
                     userScores[key] = (userScores[key] || 0) + opt.scores[key];
                 }
@@ -700,7 +690,7 @@
         if (currentStep > 0) {
             currentStep--;
             const lastAddedScores = scoreHistory.pop();
-            userAnswers.pop(); 
+            userAnswers.pop();
             if (lastAddedScores) {
                 for (let key in lastAddedScores) {
                     userScores[key] -= lastAddedScores[key];
@@ -734,18 +724,17 @@
         document.getElementById("res-ai").innerHTML = res.ai;
         document.getElementById("res-advice").innerHTML = res.advice;
 
-        // Отправка данных в Google Sheet
+        // Отправка данных (через картинку)
         sendDataToGoogleSheet(telegramNick, winner, userScores, userAnswers);
     }
 
     function sendDataToGoogleSheet(telegram, winner, scores, answers) {
-        // Убедись, что ссылка верная!
-        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycby6zI-h-JUho1OmIzzQCCh7ra0aKBtIj_PXcBbRx-2wx0DgiLOYOR1qaa8mTPBBzPBTgg/exec") {
-            console.warn("Ссылка не настроена!");
+        if (!GOOGLE_SCRIPT_URL.startsWith("https://script.google.com/macros/library/d/1LksfSF1qD6fGCoPZaRWM38YpZOZi_bRSDuP1Vikpd8xJlCAeAWoRSi03/5")) {
+            console.warn("Ссылка на Google Script не настроена.");
             return;
         }
 
-        // Подготавливаем данные
+        // Подготавливаем данные для URL
         const params = new URLSearchParams({
             telegram: telegram,
             role: resultsData[winner].title,
@@ -753,16 +742,13 @@
             answers: JSON.stringify(answers)
         }).toString();
 
-        // Отправляем как "картинку" (самый надежный хак)
+        // Отправляем как "картинку" (самый надежный способ GET)
         const img = new Image();
         img.src = GOOGLE_SCRIPT_URL + "?" + params;
         
-        console.log("Данные отправлены (метод Image GET)");
+        console.log("Отправка данных (Image GET)...");
     }
-
 </script>
 
 </body>
 </html>
-
-
