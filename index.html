@@ -729,42 +729,37 @@
     }
 
     function sendDataToGoogleSheet(telegram, winner, scores, answers) {
-        // Убедись, что ссылка верная!
-        if (!GOOGLE_SCRIPT_URL.startsWith("https://script.google.com/macros/s/AKfycbw-hYGs4LbFnXNV3sQMxQT5pC7uuAUIQCV6xQSVu4lSbndFFyhSzDZdUDlEDGQN03Af0A/exec")) {
-            console.warn("Ссылка на скрипт не настроена!");
+        if (!GOOGLE_SCRIPT_URL.startsWith("https://script.google.com/macros/s/AKfycbxnEMxxr7RwuMKXU2E0_oHhDUyaXs4kyY2XmL0cVEvvj133fknLzeq-uNtID1TMSlTf7g/exec")) {
+            console.warn("Ссылка не настроена!");
             return;
         }
 
-        // Формируем параметры для URL (как ты делал вручную)
         const params = new URLSearchParams({
             telegram: telegram,
             role: resultsData[winner].title,
             scores: JSON.stringify(scores),
-            answers: JSON.stringify(answers),
-            // Добавляем случайное число, чтобы браузер не кэшировал запрос
-            _t: new Date().getTime() 
-        }).toString();
+            answers: JSON.stringify(answers)
+        });
 
-        // Создаем "картинку-призрак"
-        const img = new Image();
-        
-        // Как только браузер попытается загрузить эту "картинку", запрос уйдет на сервер Google
-        img.src = GOOGLE_SCRIPT_URL + "?" + params;
-        
-        console.log("Попытка отправки через Image Beacon...");
-        
-        // Для отладки (не обязательно, но полезно)
-        img.onload = function() {
-            console.log("Google ответил успешно (картинка загрузилась)!");
-        };
-        img.onerror = function() {
-            // Это НОРМАЛЬНО для Google Script, так как он возвращает текст, а не картинку.
-            // Главное, что запрос ушел.
-            console.log("Запрос отправлен (Google вернул не картинку, но данные ушли).");
-        };
+        // Отправляем GET-запрос (как в браузере)
+        fetch(GOOGLE_SCRIPT_URL + "?" + params.toString(), {
+            method: "GET",
+            mode: "no-cors", // Важно! Это отключает строгую проверку CORS
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8",
+            },
+        })
+        .then(response => {
+            console.log("Запрос отправлен! (Статус: " + response.status + ")");
+            // При mode: 'no-cors' статус всегда 0, но запрос уходит.
+        })
+        .catch(error => {
+            console.error("Ошибка сети:", error);
+        });
     }
 </script>
 
 </body>
 </html>
+
 
