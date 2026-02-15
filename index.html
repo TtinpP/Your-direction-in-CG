@@ -739,32 +739,48 @@
     }
 
     function sendDataToGoogleSheet(telegram, winner, scores, answers) {
-        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbzpZ2ubrmNLPX0wHEXhcko45jaE-i6RnepU--JfOHeBTQPJcP16cvxXYTjeveypGwM-5Q/exec" || GOOGLE_SCRIPT_URL.length < 10) {
-            console.warn("Ссылка на Google Script не настроена. Данные не отправлены.");
+        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbym1p6qQjhIt07DGQ-UzvYf7N6C-PAHZidFe_b630FSL1F1V6etTQraFNi1HeKNeP0d5A/exec" || GOOGLE_SCRIPT_URL.length < 10) {
+            console.warn("Ссылка на Google Script не настроена.");
             return;
         }
 
+        // Создаем невидимую форму для отправки
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = GOOGLE_SCRIPT_URL;
+        form.target = 'hidden_iframe'; // Чтобы не перезагружать страницу
+        form.style.display = 'none';
+
+        // Данные для отправки
         const data = {
-            telegram: telegram, // Отправляем ник
+            telegram: telegram,
             role: resultsData[winner].title,
-            scores: scores,
-            answers: answers
+            scores: JSON.stringify(scores),
+            answers: JSON.stringify(answers)
         };
 
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors", 
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-        }).then(() => {
-            console.log("Данные успешно отправлены в таблицу");
-        }).catch(err => {
-            console.error("Ошибка отправки:", err);
-        });
+        // Создаем поля формы
+        for (const key in data) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = data[key];
+            form.appendChild(input);
+        }
+
+        // Создаем скрытый iframe, куда уйдет результат (чтобы пользователь остался на странице)
+        const iframe = document.createElement('iframe');
+        iframe.name = 'hidden_iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+
+        // Отправляем
+        form.submit();
+        console.log("Данные отправлены через форму!");
     }
 </script>
 
 </body>
 </html>
+
