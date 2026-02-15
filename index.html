@@ -730,7 +730,7 @@
 
     function sendDataToGoogleSheet(telegram, winner, scores, answers) {
         // Убедись, что ссылка верная!
-        if (!GOOGLE_SCRIPT_URL.startsWith("http")) {
+        if (!GOOGLE_SCRIPT_URL.startsWith("https://script.google.com/macros/s/AKfycbw-hYGs4LbFnXNV3sQMxQT5pC7uuAUIQCV6xQSVu4lSbndFFyhSzDZdUDlEDGQN03Af0A/exec")) {
             console.warn("Ссылка на скрипт не настроена!");
             return;
         }
@@ -767,3 +767,4 @@
 
 </body>
 </html>
+
