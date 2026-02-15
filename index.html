@@ -728,58 +728,42 @@
         sendDataToGoogleSheet(telegramNick, winner, userScores, userAnswers);
     }
 
-        function sendDataToGoogleSheet(telegram, winner, scores, answers) {
-        if (!GOOGLE_SCRIPT_URL.startsWith("https://script.google.com/macros/s/AKfycbw-hYGs4LbFnXNV3sQMxQT5pC7uuAUIQCV6xQSVu4lSbndFFyhSzDZdUDlEDGQN03Af0A/exec")) {
-            console.warn("Ссылка не настроена!");
+    function sendDataToGoogleSheet(telegram, winner, scores, answers) {
+        // Убедись, что ссылка верная!
+        if (!GOOGLE_SCRIPT_URL.startsWith("http")) {
+            console.warn("Ссылка на скрипт не настроена!");
             return;
         }
 
-        // Создаем уникальное имя для iframe
-        const iframeName = 'hidden_iframe_' + Date.now();
-
-        // 1. Создаем скрытый iframe
-        const iframe = document.createElement('iframe');
-        iframe.name = iframeName;
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-
-        // 2. Создаем форму
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = GOOGLE_SCRIPT_URL;
-        form.target = iframeName; // Ответ уйдет в iframe
-        form.style.display = 'none';
-
-        // 3. Добавляем данные
-        const data = {
+        // Формируем параметры для URL (как ты делал вручную)
+        const params = new URLSearchParams({
             telegram: telegram,
             role: resultsData[winner].title,
             scores: JSON.stringify(scores),
-            answers: JSON.stringify(answers)
+            answers: JSON.stringify(answers),
+            // Добавляем случайное число, чтобы браузер не кэшировал запрос
+            _t: new Date().getTime() 
+        }).toString();
+
+        // Создаем "картинку-призрак"
+        const img = new Image();
+        
+        // Как только браузер попытается загрузить эту "картинку", запрос уйдет на сервер Google
+        img.src = GOOGLE_SCRIPT_URL + "?" + params;
+        
+        console.log("Попытка отправки через Image Beacon...");
+        
+        // Для отладки (не обязательно, но полезно)
+        img.onload = function() {
+            console.log("Google ответил успешно (картинка загрузилась)!");
         };
-
-        for (const key in data) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = data[key];
-            form.appendChild(input);
-        }
-
-        document.body.appendChild(form);
-
-        // 4. Отправляем
-        form.submit();
-        console.log("Данные отправлены через форму!");
-
-        // 5. Убираем мусор через пару секунд
-        setTimeout(() => {
-            document.body.removeChild(form);
-            // iframe лучше не удалять сразу, пусть висит
-        }, 2000);
+        img.onerror = function() {
+            // Это НОРМАЛЬНО для Google Script, так как он возвращает текст, а не картинку.
+            // Главное, что запрос ушел.
+            console.log("Запрос отправлен (Google вернул не картинку, но данные ушли).");
+        };
     }
 </script>
 
 </body>
 </html>
-
