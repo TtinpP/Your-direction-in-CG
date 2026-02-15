@@ -330,10 +330,15 @@
 </div>
 
 <script>
+    // === ВАЖНО: ВСТАВЬ СЮДА ССЫЛКУ ИЗ GOOGLE SCRIPTS ===
+    // Пример: "https://script.google.com/macros/s/AKfycbx.../exec"
+    const GOOGLE_SCRIPT_URL = "ВСТАВЬ_СЮДА_СВОЮ_ССЫЛКУ";
+    // ====================================================
+
     // Данные теста
     const questions = [
         {
-            text: "Представь: у тебя очень слабый ноутбук, который с трудом тянет игры. Но тебе нужно сделать крутой проект. Твоя стратегия?",
+            text: "Представь: у тебя очень слабый ноутбук, который с трудом тянет современные игры. Но тебе нужно сделать крутой проект. Твоя стратегия?",
             options: [
                 { text: "Придумаю стильную, но минималистичную графику. Стиль важнее 'тяжелых' эффектов.", scores: { artdir: 2, story: 1 } },
                 { text: "Использую нейросети для генерации контента. Им не нужна моя видеокарта.", scores: { ai_gen: 3 } },
@@ -344,10 +349,10 @@
         {
             text: "Ты смотришь фильм с невероятной графикой. На что ты обращаешь внимание в первую очередь?",
             options: [
-                { text: "Как они технически реализовали этот эффект?", scores: { lead: 2, ai_gen: 1 } },
-                { text: "Почему кадр построен именно так? Какая цветовая палитра передает настроение?", scores: { artdir: 3 } },
-                { text: "Верится ли в этот мир? Какая история стоит за этими декорациями?", scores: { story: 3 } },
-                { text: "Какой бюджет и сколько людей нужно, чтобы организовать такой масштаб?", scores: { manager: 3 } }
+                { text: "«Как они технически реализовали этот эффект?»", scores: { lead: 2, ai_gen: 1 } },
+                { text: "«Почему кадр построен именно так? Какая цветовая палитра передает настроение?»", scores: { artdir: 3 } },
+                { text: "«Верится ли в этот мир? Какая история стоит за этими декорациями?»", scores: { story: 3 } },
+                { text: "«Какой бюджет и сколько людей нужно, чтобы организовать такой масштаб?»", scores: { manager: 3 } }
             ]
         },
         {
@@ -482,6 +487,7 @@
     let currentStep = 0;
     let userScores = { manager: 0, artdir: 0, lead: 0, ai_gen: 0, story: 0 };
     let scoreHistory = [];
+    let userAnswers = []; // Сохраняем тексты ответов
 
     function startQuiz() {
         document.getElementById("start-screen").style.display = "none";
@@ -525,6 +531,7 @@
             
             btn.onclick = () => {
                 scoreHistory.push(opt.scores);
+                userAnswers.push(opt.text); // Запоминаем ответ
                 for (let key in opt.scores) {
                     userScores[key] = (userScores[key] || 0) + opt.scores[key];
                 }
@@ -551,6 +558,7 @@
         if (currentStep > 0) {
             currentStep--;
             const lastAddedScores = scoreHistory.pop();
+            userAnswers.pop(); // Удаляем последний ответ
             if (lastAddedScores) {
                 for (let key in lastAddedScores) {
                     userScores[key] -= lastAddedScores[key];
@@ -583,6 +591,35 @@
         document.getElementById("res-psycho").innerHTML = res.psycho;
         document.getElementById("res-ai").innerHTML = res.ai;
         document.getElementById("res-advice").innerHTML = res.advice;
+
+        // Отправка данных в Google Sheet
+        sendDataToGoogleSheet(winner, userScores, userAnswers);
+    }
+
+    function sendDataToGoogleSheet(winner, scores, answers) {
+        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbzot2OdRgF1Cnme4XXFPH4ras_9K4QQEn3aNrNR9DCdWRtyiLmfd4AaZRoKgveh7HG2Kg/exec" || GOOGLE_SCRIPT_URL.length < 10) {
+            console.warn("Ссылка на Google Script не настроена. Данные не отправлены.");
+            return;
+        }
+
+        const data = {
+            role: resultsData[winner].title,
+            scores: scores,
+            answers: answers
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors", // Важно для Google Scripts
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        }).then(() => {
+            console.log("Данные успешно отправлены в таблицу");
+        }).catch(err => {
+            console.error("Ошибка отправки:", err);
+        });
     }
 </script>
 
