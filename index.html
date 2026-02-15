@@ -12,6 +12,7 @@
             --text-color: #f1f5f9;
             --accent-purple: #a855f7;
             --accent-green: #10b981;
+            --error-color: #ef4444;
         }
 
         body {
@@ -72,28 +73,115 @@
         .start-desc {
             font-size: 16px;
             color: #94a3b8;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             max-width: 400px;
             line-height: 1.6;
         }
 
-        .start-btn {
-            background: linear-gradient(135deg, var(--primary-color), #00c2bb);
-            color: #0f172a;
+        /* Поле ввода Telegram */
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tg-input-wrapper {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .tg-at-symbol {
+            position: absolute;
+            left: 15px;
+            color: #64748b;
+            font-size: 18px;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .tg-input {
+            width: 100%;
+            padding: 15px 15px 15px 35px; /* Отступ слева под @ */
+            border-radius: 12px;
+            border: 2px solid #334155;
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .tg-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 242, 234, 0.2);
+        }
+        
+        .tg-input.valid {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .confirm-btn {
+            background-color: #334155;
+            color: #94a3b8;
             border: none;
-            padding: 20px 50px;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-weight: bold;
+            cursor: not-allowed;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .confirm-btn.active {
+            background-color: var(--accent-green);
+            color: #0f172a;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .confirm-btn.success {
+            background-color: transparent;
+            color: var(--accent-green);
+            box-shadow: none;
+            cursor: default;
+            font-size: 20px;
+            padding: 0 10px;
+        }
+
+        .start-btn {
+            background: #334155; /* Серый изначально */
+            color: #64748b;
+            border: none;
+            padding: 20px 60px;
             border-radius: 50px;
             font-size: 20px;
             font-weight: 800;
-            cursor: pointer;
+            cursor: not-allowed;
             text-transform: uppercase;
             letter-spacing: 2px;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .start-btn.ready {
+            background: linear-gradient(135deg, var(--primary-color), #00c2bb);
+            color: #0f172a;
+            cursor: pointer;
             box-shadow: 0 0 20px rgba(0, 242, 234, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
+            opacity: 1;
+            pointer-events: auto;
             animation: pulse-btn 2s infinite;
         }
 
-        .start-btn:hover {
+        .start-btn.ready:hover {
             transform: scale(1.05);
             box-shadow: 0 0 35px rgba(0, 242, 234, 0.6);
         }
@@ -278,8 +366,18 @@
     <div class="start-screen">
         <div class="start-icon">🔮</div>
         <div class="start-title">Твоё направление<br>в CG</div>
-        <div class="start-desc">Узнай свою роль в мире компьютерной графики и нейросетей. Найди свой путь, где талант важнее видеокарты.</div>
-        <button class="start-btn" onclick="startQuiz()">Начать</button>
+        <div class="start-desc">Узнай свою роль в мире компьютерной графики и нейросетей. Введи свой Telegram, чтобы начать.</div>
+        
+        <!-- Ввод Telegram -->
+        <div class="input-group">
+            <div class="tg-input-wrapper">
+                <span class="tg-at-symbol">@</span>
+                <input type="text" class="tg-input" id="tg-username" placeholder="telegram_nick" maxlength="32" oninput="validateInput()">
+            </div>
+            <button class="confirm-btn" id="confirm-btn" onclick="confirmTelegram()">OK</button>
+        </div>
+
+        <button class="start-btn" id="start-quiz-btn" onclick="startQuiz()">Начать</button>
     </div>
 </div>
 
@@ -331,9 +429,53 @@
 
 <script>
     // === ВАЖНО: ВСТАВЬ СЮДА ССЫЛКУ ИЗ GOOGLE SCRIPTS ===
-    // Пример: "https://script.google.com/macros/s/AKfycbx.../exec"
     const GOOGLE_SCRIPT_URL = "ВСТАВЬ_СЮДА_СВОЮ_ССЫЛКУ";
     // ====================================================
+
+    let telegramNick = ""; // Переменная для хранения ника
+
+    // Функция валидации ввода (проверяем длину > 4 символов)
+    function validateInput() {
+        const input = document.getElementById("tg-username");
+        const btn = document.getElementById("confirm-btn");
+        const val = input.value.trim();
+
+        // Убираем @ если пользователь ввел его сам
+        if (val.startsWith("@")) {
+            input.value = val.substring(1);
+        }
+
+        if (input.value.length >= 5) {
+            btn.classList.add("active");
+            btn.disabled = false;
+        } else {
+            btn.classList.remove("active");
+            btn.disabled = true;
+        }
+    }
+
+    // Функция подтверждения ника
+    function confirmTelegram() {
+        const input = document.getElementById("tg-username");
+        const confirmBtn = document.getElementById("confirm-btn");
+        const startBtn = document.getElementById("start-quiz-btn");
+        
+        if (input.value.length >= 5) {
+            telegramNick = "@" + input.value; // Сохраняем с собачкой
+            
+            // Визуальные изменения
+            input.disabled = true;
+            input.classList.add("valid");
+            
+            confirmBtn.innerText = "✓"; // Галочка
+            confirmBtn.classList.remove("active");
+            confirmBtn.classList.add("success");
+            confirmBtn.disabled = true; // Блокируем кнопку OK
+            
+            // Активируем кнопку НАЧАТЬ
+            startBtn.classList.add("ready");
+        }
+    }
 
     // Данные теста
     const questions = [
@@ -487,7 +629,7 @@
     let currentStep = 0;
     let userScores = { manager: 0, artdir: 0, lead: 0, ai_gen: 0, story: 0 };
     let scoreHistory = [];
-    let userAnswers = []; // Сохраняем тексты ответов
+    let userAnswers = []; 
 
     function startQuiz() {
         document.getElementById("start-screen").style.display = "none";
@@ -531,7 +673,7 @@
             
             btn.onclick = () => {
                 scoreHistory.push(opt.scores);
-                userAnswers.push(opt.text); // Запоминаем ответ
+                userAnswers.push(opt.text); 
                 for (let key in opt.scores) {
                     userScores[key] = (userScores[key] || 0) + opt.scores[key];
                 }
@@ -558,7 +700,7 @@
         if (currentStep > 0) {
             currentStep--;
             const lastAddedScores = scoreHistory.pop();
-            userAnswers.pop(); // Удаляем последний ответ
+            userAnswers.pop(); 
             if (lastAddedScores) {
                 for (let key in lastAddedScores) {
                     userScores[key] -= lastAddedScores[key];
@@ -593,16 +735,17 @@
         document.getElementById("res-advice").innerHTML = res.advice;
 
         // Отправка данных в Google Sheet
-        sendDataToGoogleSheet(winner, userScores, userAnswers);
+        sendDataToGoogleSheet(telegramNick, winner, userScores, userAnswers);
     }
 
-    function sendDataToGoogleSheet(winner, scores, answers) {
-        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbzot2OdRgF1Cnme4XXFPH4ras_9K4QQEn3aNrNR9DCdWRtyiLmfd4AaZRoKgveh7HG2Kg/exec" || GOOGLE_SCRIPT_URL.length < 10) {
+    function sendDataToGoogleSheet(telegram, winner, scores, answers) {
+        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbzpZ2ubrmNLPX0wHEXhcko45jaE-i6RnepU--JfOHeBTQPJcP16cvxXYTjeveypGwM-5Q/exec" || GOOGLE_SCRIPT_URL.length < 10) {
             console.warn("Ссылка на Google Script не настроена. Данные не отправлены.");
             return;
         }
 
         const data = {
+            telegram: telegram, // Отправляем ник
             role: resultsData[winner].title,
             scores: scores,
             answers: answers
@@ -610,7 +753,7 @@
 
         fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
-            mode: "no-cors", // Важно для Google Scripts
+            mode: "no-cors", 
             headers: {
                 "Content-Type": "application/json"
             },
