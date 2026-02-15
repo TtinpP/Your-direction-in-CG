@@ -739,48 +739,30 @@
     }
 
     function sendDataToGoogleSheet(telegram, winner, scores, answers) {
-        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbym1p6qQjhIt07DGQ-UzvYf7N6C-PAHZidFe_b630FSL1F1V6etTQraFNi1HeKNeP0d5A/exec" || GOOGLE_SCRIPT_URL.length < 10) {
-            console.warn("Ссылка на Google Script не настроена.");
+        // Убедись, что ссылка верная!
+        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycby6zI-h-JUho1OmIzzQCCh7ra0aKBtIj_PXcBbRx-2wx0DgiLOYOR1qaa8mTPBBzPBTgg/exec") {
+            console.warn("Ссылка не настроена!");
             return;
         }
 
-        // Создаем невидимую форму для отправки
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = GOOGLE_SCRIPT_URL;
-        form.target = 'hidden_iframe'; // Чтобы не перезагружать страницу
-        form.style.display = 'none';
-
-        // Данные для отправки
-        const data = {
+        // Подготавливаем данные
+        const params = new URLSearchParams({
             telegram: telegram,
             role: resultsData[winner].title,
             scores: JSON.stringify(scores),
             answers: JSON.stringify(answers)
-        };
+        }).toString();
 
-        // Создаем поля формы
-        for (const key in data) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = data[key];
-            form.appendChild(input);
-        }
-
-        // Создаем скрытый iframe, куда уйдет результат (чтобы пользователь остался на странице)
-        const iframe = document.createElement('iframe');
-        iframe.name = 'hidden_iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-        document.body.appendChild(form);
-
-        // Отправляем
-        form.submit();
-        console.log("Данные отправлены через форму!");
+        // Отправляем как "картинку" (самый надежный хак)
+        const img = new Image();
+        img.src = GOOGLE_SCRIPT_URL + "?" + params;
+        
+        console.log("Данные отправлены (метод Image GET)");
     }
+
 </script>
 
 </body>
 </html>
+
 
